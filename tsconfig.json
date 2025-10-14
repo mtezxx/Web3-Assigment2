@@ -4,7 +4,17 @@
     "outDir": "./dist/",
     "sourceMap": true,
     "target": "ES2022",
-    "lib":["ES2022", "DOM"],
-    "moduleResolution": "Node"
-  }
+    "lib": ["ES2022", "DOM"],
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "baseUrl": ".",
+    "paths": { "@/*": ["src/*"] },
+    "types": ["vite/client", "node"],
+    "jsx": "preserve",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "noEmit": true,
+    "skipLibCheck": true
+  },
+  "include": ["src/**/*.ts", "src/**/*.tsx", "src/**/*.vue", "src/**/*.d.ts", "vite.config.ts"]
 }

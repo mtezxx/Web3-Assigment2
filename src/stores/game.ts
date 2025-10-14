@@ -15,7 +15,7 @@ export const useGameStore = defineStore('game', {
   getters: {
     playerInTurnName(state): string | undefined {
       const p = state.round?.playerInTurn()
-      return p === undefined ? undefined : state.players[p]
+      return p !== undefined ? state.players[p] : undefined
     },
   },
 
@@ -27,53 +27,44 @@ export const useGameStore = defineStore('game', {
       this.mode = 'playing'
     },
 
-    play(cardIndex: number, color?: Color) {
+    // DRY wrapper for round actions
+    executeRoundAction(action: () => void) {
       if (!this.round) return
-      try {
-        this.round.play(cardIndex, color)
-        this.checkGameEnd()
-      } catch (error) {
-        console.error('Play failed:', error)
-      }
+      action()
+      this.checkGameEnd()
+    },
+
+    play(cardIndex: number, color?: Color) {
+      this.executeRoundAction(() => this.round!.play(cardIndex, color))
     },
 
     draw() {
-      if (!this.round) return
-      try {
-        this.round.draw()
-      } catch (error) {
-        console.error('Draw failed:', error)
-      }
+      this.executeRoundAction(() => this.round!.draw())
     },
 
-    sayUno(playerIndex: number) {
-      if (!this.round) return
-      try {
-        this.round.sayUno(playerIndex)
-      } catch (error) {
-        console.error('Say UNO failed:', error)
+    sayUno(playerIndex?: number) {
+      const player = playerIndex ?? this.round?.playerInTurn()
+      if (player !== undefined) {
+        this.executeRoundAction(() => this.round!.sayUno(player))
       }
     },
 
     catchUno(accuser: number, accused: number) {
-      if (!this.round) return
-      try {
-        // catchUno method is not available on the round object
-        console.log('Catch UNO not implemented')
-      } catch (error) {
-        console.error('Catch UNO failed:', error)
-      }
+      this.executeRoundAction(() => {
+        if (this.round && 'catchUno' in this.round) {
+          (this.round as any).catchUno(accuser, accused)
+        }
+      })
     },
 
     checkGameEnd() {
-      if (!this.round || !this.game) return
+      if (!this.round) return
       
-      const winner = this.round.winner()
-      if (winner !== undefined) {
-        const score = this.round.score()
-        if (score !== undefined) {
-          this.endRound(winner, score)
-        }
+      // Check if any player won
+      const winner = this.players.findIndex((_, i) => this.round!.playerHand(i).length === 0)
+      if (winner !== -1) {
+        const score = this.round.winner?.() ?? 0
+        this.endRound(winner, score)
       }
     },
 
@@ -83,11 +74,13 @@ export const useGameStore = defineStore('game', {
     },
 
     reset() {
-      this.mode = 'setup'
-      this.result = null
-      this.round = null
-      this.game = null
-      this.players = ['You', 'Bot']
+      Object.assign(this, {
+        mode: 'setup' as Mode,
+        result: null,
+        round: null,
+        game: null,
+        players: ['You', 'Bot']
+      })
     },
   },
 })

@@ -1,6 +1,7 @@
 import type { Card as DeckCard, Color as DeckColor } from './deck';
 import type { Randomizer, Shuffler } from '../utils/random_utils';
 import type { RoundMemento } from './round';
+import { createRound, createRoundFromMemento } from './round';
 import { standardRandomizer, standardShuffler } from '../utils/random_utils';
 
 export type Color = DeckColor;
@@ -131,7 +132,6 @@ export function createGameFromMemento(
     if (!memento.currentRound) {
       throw new Error('An unfinished game requires a current round');
     }
-    const { createRoundFromMemento } = roundModule();
     currentRound = createRoundFromMemento(memento.currentRound, shuffler);
     dealer = memento.currentRound.dealer;
   } else {
@@ -227,7 +227,6 @@ class UnoGame implements Game {
 
   private initialiseNewRound(): void {
     if (this.winnerIndex !== undefined) return;
-    const { createRound } = roundModule();
     const round = createRound(createRoundConfig(
       this.players,
       this.dealerIndex,
@@ -252,7 +251,6 @@ class UnoGame implements Game {
       this.currentRoundInstance = undefined;
     } else {
       this.dealerIndex = winner;
-      const { createRound } = roundModule();
       const nextRound = createRound(createRoundConfig(
         this.players,
         this.dealerIndex,
@@ -304,9 +302,7 @@ function normalisePlayers(players?: string[]): string[] {
   return result;
 }
 
-function roundModule() {
-  return require('./round') as typeof import('./round');
-}
+
 
 function ensureIndex(index: number, count: number, label: string): void {
   if (!Number.isInteger(index)) throw new Error(`${label} must be an integer`);

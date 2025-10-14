@@ -1,6 +1,10 @@
 export type BotState = {
   me: number
-  hand: any[]
+  hand: Array<{
+    type: string
+    color?: string
+    number?: number
+  }>
   canPlay: number[]
   justPlayed?: { player:number; handSize:number; saidUno:boolean }
 }

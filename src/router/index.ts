@@ -3,14 +3,11 @@ import SetupView from '@/views/SetupView.vue'
 import GameView from '@/views/GameView.vue'
 import GameOverView from '@/views/GameOverView.vue'
 
-const router = createRouter({
-  history: createWebHistory(),
+export default createRouter({
+  history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
-    { path: '/', redirect: { name: 'setup' } },
-    { name: 'setup', path: '/setup', component: SetupView },
-    { name: 'play', path: '/play', component: GameView },
-    { name: 'over', path: '/over', component: GameOverView },
+    { path: '/', name: 'setup', component: SetupView },
+    { path: '/play', name: 'play', component: GameView },
+    { path: '/over', name: 'over', component: GameOverView },
   ],
 })
-
-export default router
